@@ -58,7 +58,7 @@
 
 # Демонстрация 
 ## URDF модель робота
-<img src="docs/urdf_model.png" alt="Jetson Nano Rover" width="100%"/>
+<img src="docs/images/urdf_model.png" alt="Jetson Nano Rover" width="100%"/>
 
 ## Управление с клавиатуры
 ![keyboard](docs/gif/keyboard_control.gif)
