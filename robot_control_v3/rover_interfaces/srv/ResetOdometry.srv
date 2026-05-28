@@ -1,0 +1,7 @@
+# Сброс одометрии в произвольную точку
+float64 x                      # м
+float64 y                      # м
+float64 yaw_deg                # ° (0 = смотрит вдоль X)
+---
+bool   success
+string message

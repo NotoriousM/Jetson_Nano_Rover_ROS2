@@ -1,0 +1,74 @@
+# =============================================================================
+# Параметры робота robot_control_v3
+# Загружаются launch-файлами в каждый узел.
+# =============================================================================
+
+# ── Кинематика Аккермана ─────────────────────────────────────────────────────
+ackermann_calculator_node:
+  ros__parameters:
+    wheelbase:             0.807     # колёсная база (м)
+    track_width:           0.779     # ширина колеи (м)
+    a_distance:            0.4035    # передняя ось → центр (м)
+    b_distance:            0.4035    # задняя ось   → центр (м)
+    initial_pos_servo_deg: 90.0      # нейтральный угол серво (°)
+    max_speed:             2.0       # максимальная скорость (м/с)
+    max_steering_angle:    35.0      # максимальный угол поворота (°)
+
+# ── Serial Controller (USB CDC к 6 STM32) ────────────────────────────────────
+serial_controller_node:
+  ros__parameters:
+    baudrate:              115200
+    timeout:               0.1
+    initial_pos_servo_deg: 90.0
+    # Стабильные symlinks через udev:
+    # /etc/udev/rules.d/99-rover-wheels.rules
+    port_front_right:      /dev/ttyROVER_WHEEL_1
+    port_middle_right:     /dev/ttyROVER_WHEEL_2
+    port_rear_right:       /dev/ttyROVER_WHEEL_3
+    port_front_left:       /dev/ttyROVER_WHEEL_4
+    port_middle_left:      /dev/ttyROVER_WHEEL_5
+    port_rear_left:        /dev/ttyROVER_WHEEL_6
+
+# ── Одометрия ────────────────────────────────────────────────────────────────
+odometry_node:
+  ros__parameters:
+    track_width:             0.779
+    wheel_radius:            0.1
+    speed_conversion_factor: 1.0     # коэф. перевода единиц энкодера в м/с
+    publish_rate:            50      # Гц
+    odom_frame_id:           odom
+    base_frame_id:           base_link
+
+# ── Аппаратная защита (читает SendData.flag от STM32) ────────────────────────
+flag_safety_node:
+  ros__parameters:
+    auto_clear_when_flag_resets: true   # автоматически снимать защиту
+                                         # когда STM32 сбросил все флаги
+    publish_rate_hz:             20.0
+
+# ── Контроллер клавиатуры ────────────────────────────────────────────────────
+keyboard_controller_node:
+  ros__parameters:
+    max_speed:           2.0
+    max_steering_angle:  30.0
+    step_speed:          0.2
+    step_angle:          3.0
+    publish_rate_hz:     20.0
+
+# ── Контроллер DualShock 4 ───────────────────────────────────────────────────
+dualshock4_controller_node:
+  ros__parameters:
+    max_speed:           2.0
+    max_steering_angle:  30.0
+    deadzone:            0.1
+    steering_exponent:   1.5
+    publish_rate_hz:     20.0
+
+# ── Траектория по прямой ─────────────────────────────────────────────────────
+straight_trajectory_node:
+  ros__parameters:
+    publish_rate_hz:    20.0
+    brake_distance:     0.3          # начало замедления (м)
+    brake_speed:        0.1          # скорость в зоне замедления (м/с)
+    finish_tolerance:   0.05         # допуск до цели (м)
+    max_speed:          1.5          # ограничение скорости траектории

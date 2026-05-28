@@ -1,0 +1,29 @@
+# /etc/netplan/01-rover-eth.yaml
+# Скопировать на Jetson: sudo cp netplan-jetson.yaml /etc/netplan/01-rover-eth.yaml
+# Применить:             sudo netplan apply
+
+network:
+  version: 2
+  renderer: networkd
+
+  ethernets:
+    eth0:                       # на Jetson Nano всегда eth0
+      addresses:
+        - 192.168.10.2/24
+      dhcp4: false
+      optional: true
+      # Чтобы Jetson мог попадать в интернет через PC (для apt update и т.д.)
+      # PC должен иметь включенный IP forwarding — см. setup_network.sh
+      routes:
+        - to: default
+          via: 192.168.10.1
+          metric: 200          # выше metric = ниже приоритет, чем wlan0
+
+  # WiFi (резервный канал, например для SSH в поле)
+  wifis:
+    wlan0:
+      access-points:
+        "YOUR_WIFI_SSID":       # ⚠ замени на свой SSID
+          password: "YOUR_WIFI_PASSWORD"
+      dhcp4: true                # IP получаем от роутера
+      optional: true

@@ -1,0 +1,58 @@
+# controllers.yaml
+# =====================================================================
+# Конфигурация ros2_control для Gazebo-симуляции ровера.
+# Читается плагином gazebo_ros2_control при старте Gazebo.
+#
+# Как это работает:
+#   Когда Gazebo запускается и загружает URDF, плагин gazebo_ros2_control
+#   читает этот файл и создаёт три контроллера:
+#
+#   joint_state_broadcaster — пассивный «слушатель»: читает реальные
+#     углы/скорости суставов из физики Gazebo и публикует их в /joint_states.
+#     Именно благодаря ему robot_state_publisher строит TF-дерево.
+#
+#   steering_controller — принимает массив из 4 целевых углов (рад) и
+#     удерживает рулевые суставы в этих позициях (PD-регулятор внутри).
+#     Топик: /steering_controller/commands  (Float64MultiArray)
+#
+#   drive_controller — принимает массив из 6 угловых скоростей (рад/с)
+#     и поддерживает эту скорость вращения ведущих суставов.
+#     Топик: /drive_controller/commands  (Float64MultiArray)
+# =====================================================================
+
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Гц — частота внутреннего цикла управления
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    steering_controller:
+      type: position_controllers/JointGroupPositionController
+
+    drive_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+
+# Порядок суставов в steering_controller ДОЛЖЕН совпадать с порядком
+# элементов в массиве команд из ackermann_gazebo_node.py.
+# Индекс 0 = первый элемент Float64MultiArray.data и т.д.
+steering_controller:
+  ros__parameters:
+    joints:
+      - rotate_left_front_joint    # [0] → +alpha_L
+      - rotate_right_front_joint   # [1] → +alpha_R
+      - rotate_left_rear_joint     # [2] → -beta_L
+      - rotate_right_rear_joint    # [3] → -beta_R
+
+
+# То же самое для drive_controller.
+drive_controller:
+  ros__parameters:
+    joints:
+      - wheel_left_front_joint     # [0] FL
+      - wheel_left_middle_joint    # [1] ML
+      - wheel_left_rear_joint      # [2] RL
+      - wheel_right_front_joint    # [3] FR
+      - wheel_right_middle_joint   # [4] MR
+      - wheel_right_rear_joint     # [5] RR

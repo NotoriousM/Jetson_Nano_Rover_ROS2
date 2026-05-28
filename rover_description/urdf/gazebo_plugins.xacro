@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    gazebo_plugins.xacro
+    =====================================================================
+    Подключается из rover.urdf.xacro:
+      <xacro:include filename="$(find rover_description)/urdf/gazebo_plugins.xacro"/>
+
+    Содержит три секции:
+      1. Физические свойства колёс (трение, жёсткость контакта с поверхностью)
+      2. Интерфейс ros2_control — объявляет управляемые суставы и тип интерфейса
+      3. Gazebo-плагин gazebo_ros2_control — связывает п.2 с физическим движком
+    =====================================================================
+  -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       СЕКЦИЯ 1: Физические свойства колёс
+       ═══════════════════════════════════════════════════════════
+       mu1  — продольное трение (разгон/торможение). Высокое = хорошее сцепление.
+       mu2  — боковое трение (сопротивление уводу). Меньше mu1 — типично для шин.
+       kp   — жёсткость контактной пружины. Высокое (1e6) = твёрдое колесо.
+       kd   — демпфирование контакта. Небольшое (1.0) = без вибраций.
+       minDepth — минимальное заглубление для расчёта контакта.
+                  Предотвращает «проваливание» колеса сквозь землю.
+  -->
+  <xacro:macro name="wheel_gazebo" params="link_name">
+    <gazebo reference="${link_name}">
+      <mu1>1.0</mu1>
+      <mu2>0.5</mu2>
+      <kp>1000000.0</kp>
+      <kd>1.0</kd>
+      <minDepth>0.002</minDepth>
+      <maxVel>1.0</maxVel>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:wheel_gazebo link_name="Wheel_L_FRONT"/>
+  <xacro:wheel_gazebo link_name="Wheel_L_MIDDLE"/>
+  <xacro:wheel_gazebo link_name="WHEEL_L_REAR"/>
+  <xacro:wheel_gazebo link_name="Wheel_R_FRONT"/>
+  <xacro:wheel_gazebo link_name="Wheel_R_MIDDLE"/>
+  <xacro:wheel_gazebo link_name="Wheel_R_REAR"/>
+
+  <!-- Цвет кузова в Gazebo -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <!--
+    Rocker_R в URDF имеет mass=0 и нулевую инерцию.
+    Gazebo сливает его с base_link через fixed joint lumping, поэтому
+    это не вызывает сбоев. turnGravityOff=false просто явно говорит:
+    "применяй гравитацию как обычно" — страховка от возможных предупреждений.
+  -->
+  <gazebo reference="Rocker_R">
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       СЕКЦИЯ 2: Интерфейс ros2_control
+       ═══════════════════════════════════════════════════════════
+       Здесь объявляется, какие суставы управляемые и как именно.
+
+       Рулевые суставы (4 шт.) → command_interface: position
+         Мы отправляем УГОЛ (рад), ros2_control удерживает его.
+         Это как цифровой сервопривод.
+
+       Ведущие суставы (6 шт.) → command_interface: velocity
+         Мы отправляем УГЛОВУЮ СКОРОСТЬ (рад/с).
+         Колесо крутится с этой скоростью пока получает команду.
+         Линейная скорость = угловая × радиус (0.097 м).
+  -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <!-- Рулевые суставы: position interface -->
+    <joint name="rotate_left_front_joint">
+      <command_interface name="position">
+        <param name="min">-0.7</param>
+        <param name="max"> 0.7</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rotate_right_front_joint">
+      <command_interface name="position">
+        <param name="min">-0.7</param>
+        <param name="max"> 0.7</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rotate_left_rear_joint">
+      <command_interface name="position">
+        <param name="min">-0.7</param>
+        <param name="max"> 0.7</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rotate_right_rear_joint">
+      <command_interface name="position">
+        <param name="min">-0.7</param>
+        <param name="max"> 0.7</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Ведущие суставы: velocity interface -->
+    <!-- ±50 рад/с → линейная ≈ ±4.85 м/с (50 × 0.097). Запас для симуляции. -->
+    <joint name="wheel_left_front_joint">
+      <command_interface name="velocity">
+        <param name="min">-50</param>
+        <param name="max"> 50</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wheel_left_middle_joint">
+      <command_interface name="velocity">
+        <param name="min">-50</param>
+        <param name="max"> 50</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wheel_left_rear_joint">
+      <command_interface name="velocity">
+        <param name="min">-50</param>
+        <param name="max"> 50</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wheel_right_front_joint">
+      <command_interface name="velocity">
+        <param name="min">-50</param>
+        <param name="max"> 50</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wheel_right_middle_joint">
+      <command_interface name="velocity">
+        <param name="min">-50</param>
+        <param name="max"> 50</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wheel_right_rear_joint">
+      <command_interface name="velocity">
+        <param name="min">-50</param>
+        <param name="max"> 50</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       СЕКЦИЯ 3: Плагин gazebo_ros2_control
+       ═══════════════════════════════════════════════════════════
+       Загружается внутри Gazebo при старте. Читает controllers.yaml,
+       запускает controller_manager и связывает его с физикой Gazebo.
+  -->
+  <gazebo>
+    <static>true</static>    
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find rover_description)/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

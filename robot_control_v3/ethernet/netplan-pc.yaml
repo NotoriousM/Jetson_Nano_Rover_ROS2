@@ -1,0 +1,17 @@
+# /etc/netplan/01-rover-eth.yaml
+# Скопировать на PC: sudo cp netplan-pc.yaml /etc/netplan/01-rover-eth.yaml
+# Применить:         sudo netplan apply
+
+network:
+  version: 2
+  renderer: networkd
+
+  ethernets:
+    eth0:                       # ВАЖНО: проверь имя интерфейса (ip link)
+                                 # на современных Ubuntu это обычно enp3s0, eno1, ens33
+      addresses:
+        - 192.168.10.1/24
+      dhcp4: false
+      optional: true            # не блокировать загрузку, если кабель не подключён
+      # Убираем default route через этот интерфейс — интернет идёт через wlan0
+      # на PC (если есть) или через основной интерфейс. Маршрут только в подсеть робота.

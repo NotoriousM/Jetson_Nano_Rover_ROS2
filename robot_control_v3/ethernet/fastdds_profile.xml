@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FastDDS profile — принудительно использовать только один сетевой интерфейс.
+
+  Зачем: на Jetson обычно активны и eth0, и wlan0 одновременно. Без этого XML
+  FastDDS будет отправлять discovery в обе сети, что приводит к:
+    - дубликаты пакетов (на PC приходит и через Ethernet, и через WiFi)
+    - WiFi быстрее установит discovery, и данные пойдут через медленный канал
+    - random latency
+
+  Использование:
+    export FASTRTPS_DEFAULT_PROFILES_FILE=/path/to/fastdds_profile.xml
+
+  ВАЖНО: значение interfaceWhiteList должно совпадать с реальным IP машины.
+  - на PC      → 192.168.10.1
+  - на Jetson  → 192.168.10.2
+  Этот файл — общий шаблон. Скрипт setup_network.sh подставит правильный IP.
+-->
+<dds>
+  <profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+
+    <transport_descriptors>
+      <transport_descriptor>
+        <transport_id>udp_eth_only</transport_id>
+        <type>UDPv4</type>
+        <interfaceWhiteList>
+          <!-- Этот адрес заменяется автоматически setup_network.sh -->
+          <address>__HOST_IP__</address>
+        </interfaceWhiteList>
+      </transport_descriptor>
+    </transport_descriptors>
+
+    <participant profile_name="rover_default" is_default_profile="true">
+      <rtps>
+        <userTransports>
+          <transport_id>udp_eth_only</transport_id>
+        </userTransports>
+        <!-- Отключаем стандартные транспорты, чтобы DDS использовал ТОЛЬКО eth0 -->
+        <useBuiltinTransports>false</useBuiltinTransports>
+
+        <builtin>
+          <discovery_config>
+            <!-- Discovery: куда стучаться при старте, чтобы найти других участников.
+                 Подсеть 192.168.10.0/24, multicast 239.255.0.1:7400 (стандарт DDS).
+                 Если multicast в сети заблокирован — раскомментировать initialPeersList. -->
+            <!--
+            <initialPeersList>
+              <locator>
+                <udpv4>
+                  <address>192.168.10.1</address>
+                  <port>7400</port>
+                </udpv4>
+              </locator>
+              <locator>
+                <udpv4>
+                  <address>192.168.10.2</address>
+                  <port>7400</port>
+                </udpv4>
+              </locator>
+            </initialPeersList>
+            -->
+          </discovery_config>
+        </builtin>
+      </rtps>
+    </participant>
+
+  </profiles>
+</dds>

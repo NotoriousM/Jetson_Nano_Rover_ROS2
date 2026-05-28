@@ -1,0 +1,23 @@
+# ROS2 colcon build artifacts
+build/
+install/
+log/
+
+# Лишние пакеты и архивы
+rover_gazebo/
+rover_gazebo.zip
+six_wheel_robot/
+robot_control_v2/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Editors
+.vscode/
+.idea/
+
+# Misc
+*.swp
+*.swo
+.DS_Store
