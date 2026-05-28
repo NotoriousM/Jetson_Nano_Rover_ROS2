@@ -56,21 +56,15 @@
 | 🎯 Траектории | прямая с торможением + лемниската (∞) |
 | 🖥️ Симуляция | URDF/Xacro, RViz2, Gazebo |
 
-### Демонстрация
+# Демонстрация 
+## URDF модель робота
+<img src="docs/images/urdf_model.png" alt="Jetson Nano Rover" width="100%"/>
 
-<div align="center">
+## Управление с клавиатуры
+<img src="docs/gif/keyboard_control.gif" alt="Jetson Nano Rover" width="100%"/>
 
-| Управление с клавиатуры | Лемниската ∞ в RViz2 | Суставы в RViz2 |
-|:---:|:---:|:---:|
-| ![keyboard](docs/gif/keyboard_control.gif) | ![lemniscate](docs/gif/lemniscata_t.gif) | ![joints](docs/gif/rviz_joints.gif) |
-
-| Вид спереди | Вид сбоку | Схема узлов |
-|:---:|:---:|:---:|
-| ![front](docs/images/rover_front.jpg) | ![side](docs/images/rover_side.jpg) | ![nodes](docs/images/ros2_node_graph.png) |
-
-</div>
-
----
+## Движение по траектории(Лемниската)
+<img src="docs/gif/lemniscata_t.gif" alt="Jetson Nano Rover" width="100%"/>
 
 ## 2. Аппаратная часть
 
