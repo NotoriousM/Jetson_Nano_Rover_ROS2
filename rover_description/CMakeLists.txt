@@ -22,6 +22,7 @@ install(DIRECTORY meshes/
 
 # Регистрируем figure_eight.py как исполняемый узел ROS 2
 install(PROGRAMS
+  scripts/figure_lemniscate_rviz.py
   scripts/figure_eight.py
   scripts/figure_eight_rviz.py 
   scripts/path_publisher.py

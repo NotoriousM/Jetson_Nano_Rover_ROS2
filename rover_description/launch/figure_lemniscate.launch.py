@@ -46,7 +46,7 @@ def generate_launch_description():
                           'min_distance': 0.01}],
              output='screen'),
         Node(package='rover_description',
-             executable='figure_eight_rviz.py', name='figure_eight',
+             executable='figure_lemniscate_rviz.py', name='figure_lemniscate',
              parameters=[{'linear_speed':  LaunchConfiguration('speed'),
                           'scale':         LaunchConfiguration('scale'),
                           'loop_count':    LaunchConfiguration('loops'),

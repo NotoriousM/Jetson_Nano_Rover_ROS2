@@ -49,7 +49,7 @@ class KeyboardController(Node):
         super().__init__('robot_keyboard_controller')
 
         # ── Параметры (можно переопределить при запуске) ──────────────────
-        self.declare_parameter('max_speed',          2.0)  # м/с
+        self.declare_parameter('max_speed',          0.7)  # м/с
         self.declare_parameter('max_steering_angle', 30.0) # градусы
         self.declare_parameter('base_step_speed',    0.2)  # м/с на нажатие
         self.declare_parameter('base_step_angle',    2.0)  # градусы на нажатие
